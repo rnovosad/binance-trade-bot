@@ -162,7 +162,7 @@ class BinanceAPIManager:
         from_coin_price = get_market_ticker_price_from_list(all_tickers, origin_symbol + target_symbol)
 
         order_quantity = self._buy_quantity(origin_symbol, target_symbol, target_balance, from_coin_price)
-        self.logger.info(f"BUY QTY {order_quantity}")
+        self.logger.info(f"Going to buy {origin_symbol} qty {order_quantity}")
 
         # Try to buy until successful
         order = None
@@ -184,7 +184,7 @@ class BinanceAPIManager:
 
         stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
 
-        self.logger.info(f"Bought {origin_symbol}")
+        self.logger.info(f"Bought {origin_symbol} with price {order['price']}")
 
         trade_log.set_complete(stat["cummulativeQuoteQty"])
 
@@ -231,8 +231,10 @@ class BinanceAPIManager:
         new_balance = self.get_currency_balance(origin_symbol)
         while new_balance >= origin_balance:
             new_balance = self.get_currency_balance(origin_symbol)
-
-        self.logger.info(f"Sold {origin_symbol}")
+        sold_order_price = 0
+        for fill in order["fills"]:
+            sold_order_price += float(fill['price']) / len(order['fills'])
+        self.logger.info(f"Sold {origin_symbol} with price {sold_order_price}")
 
         trade_log.set_complete(stat["cummulativeQuoteQty"])
 
