@@ -162,7 +162,7 @@ class BinanceAPIManager:
         from_coin_price = get_market_ticker_price_from_list(all_tickers, origin_symbol + target_symbol)
 
         order_quantity = self._buy_quantity(origin_symbol, target_symbol, target_balance, from_coin_price)
-        self.logger.info(f"Going to buy {origin_symbol} qty {order_quantity}")
+        self.logger.info(f"Going to buy {origin_symbol}")
 
         # Try to buy until successful
         order = None
@@ -211,20 +211,19 @@ class BinanceAPIManager:
         target_balance = self.get_currency_balance(target_symbol)
 
         order_quantity = self._sell_quantity(origin_symbol, target_symbol, origin_balance)
-        self.logger.info(f"Selling {order_quantity} of {origin_symbol}")
+        self.logger.info(f"Selling of {origin_symbol}")
 
-        self.logger.info(f"Balance is {origin_balance}")
+        self.logger.info(f"Balance is {origin_balance}", notification=False)
         order = None
         while order is None:
             order = self.binance_client.order_market_sell(symbol=origin_symbol + target_symbol, quantity=order_quantity)
 
-        self.logger.info("order")
         self.logger.info(order)
 
         trade_log.set_ordered(origin_balance, target_balance, order_quantity)
 
         # Binance server can take some time to save the order
-        self.logger.info("Waiting for Binance")
+        self.logger.info("Waiting for Binance", notification=False)
 
         stat = self.wait_for_order(origin_symbol, target_symbol, order["orderId"])
 
